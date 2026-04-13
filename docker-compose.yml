@@ -1,0 +1,14 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ementas-cms:local
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      PORT: 3000
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+      CACHE_TTL_MS: "${CACHE_TTL_MS:-600000}"
+      STALE_CACHE_MAX_AGE_MS: "${STALE_CACHE_MAX_AGE_MS:-21600000}"
+    restart: unless-stopped

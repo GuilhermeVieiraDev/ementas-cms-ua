@@ -25,6 +25,48 @@ npm run dev
 
 The API starts on `http://localhost:3000` by default.
 
+## Docker
+
+Build the image:
+
+```bash
+docker build -t ementas-cms .
+```
+
+Run the container:
+
+```bash
+docker run --rm -p 3000:3000 ementas-cms
+```
+
+With custom env values:
+
+```bash
+docker run --rm -p 3000:3000 \
+  -e LOG_LEVEL=debug \
+  -e CACHE_TTL_MS=300000 \
+  -e STALE_CACHE_MAX_AGE_MS=21600000 \
+  ementas-cms
+```
+
+Use Docker Compose with a local build:
+
+```bash
+docker-compose up --build
+```
+
+Run it in the background:
+
+```bash
+docker-compose up --build -d
+```
+
+Stop it:
+
+```bash
+docker-compose down
+```
+
 ## Environment Variables
 
 ```env
