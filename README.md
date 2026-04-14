@@ -67,6 +67,24 @@ Stop it:
 docker-compose down
 ```
 
+## GitHub Container Registry
+
+The repository includes a GitHub Actions workflow at
+[`/.github/workflows/publish-docker-image.yml`](./.github/workflows/publish-docker-image.yml)
+that publishes the Docker image to GHCR on pushes to `main`, version tags like `v1.0.0`,
+and manual runs.
+
+Published image name:
+
+```text
+ghcr.io/guilhermevieiradev/ementas-cms-ua
+```
+
+Notes:
+
+- The workflow uses the repository `GITHUB_TOKEN`, following GitHub's recommended GHCR flow.
+- The first published package may need its visibility changed in GitHub if you want it public.
+
 ## Environment Variables
 
 ```env
