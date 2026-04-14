@@ -3,6 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        HTTP_PROXY: "${HTTP_PROXY:-}"
+        HTTPS_PROXY: "${HTTPS_PROXY:-}"
+        NO_PROXY: "${NO_PROXY:-}"
     image: ementas-cms:local
     ports:
       - "${PORT:-3000}:3000"
@@ -11,4 +15,7 @@ services:
       LOG_LEVEL: "${LOG_LEVEL:-info}"
       CACHE_TTL_MS: "${CACHE_TTL_MS:-600000}"
       STALE_CACHE_MAX_AGE_MS: "${STALE_CACHE_MAX_AGE_MS:-21600000}"
+      HTTP_PROXY: "${HTTP_PROXY:-}"
+      HTTPS_PROXY: "${HTTPS_PROXY:-}"
+      NO_PROXY: "${NO_PROXY:-}"
     restart: unless-stopped

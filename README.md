@@ -92,7 +92,15 @@ PORT=3000
 LOG_LEVEL=info
 CACHE_TTL_MS=600000
 STALE_CACHE_MAX_AGE_MS=21600000
+HTTP_PROXY=
+HTTPS_PROXY=
+NO_PROXY=
 ```
+
+If your environment needs an outbound proxy to reach the UA CMS, set
+`HTTP_PROXY` or `HTTPS_PROXY`. The app configures the global fetch dispatcher
+from those variables, and `docker-compose.yml` passes them through to both the
+image build and the running container.
 
 ## Scripts
 
