@@ -92,10 +92,18 @@ PORT=3000
 LOG_LEVEL=info
 CACHE_TTL_MS=600000
 STALE_CACHE_MAX_AGE_MS=21600000
+CMS_UA_USERNAME=
+CMS_UA_PASSWORD=
 HTTP_PROXY=
 HTTPS_PROXY=
 NO_PROXY=
 ```
+
+The UA CMS currently redirects through the UA Shibboleth IDP. Set
+`CMS_UA_USERNAME` and `CMS_UA_PASSWORD` so the scraper can log in, preserve the
+CMS/IDP cookies, and then explicitly fetch `https://cms.ua.pt/ementas/ementas`
+after authentication. If the university session expires, the next refresh will
+detect the IDP redirect and log in again.
 
 If your environment needs an outbound proxy to reach the UA CMS, set
 `HTTP_PROXY` or `HTTPS_PROXY`. The app configures the global fetch dispatcher
