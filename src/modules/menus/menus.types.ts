@@ -36,6 +36,7 @@ export interface ScrapeAnomaly {
   code:
     | 'INVALID_HEADER'
     | 'INVALID_DATE'
+    | 'INFERRED_DATE'
     | 'INFERRED_YEAR'
     | 'IGNORED_WEEKDAY'
     | 'EMPTY_BODY'

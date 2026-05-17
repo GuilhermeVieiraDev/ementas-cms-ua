@@ -5,6 +5,7 @@ import {
   extractBodyLines,
   extractCanteenName,
   getCanteenId,
+  inferDateFromWeekdayOnlyHeader,
   inferYearFromNeighborHeaders,
   isClosedLine,
   isServiceMarker,
@@ -136,7 +137,14 @@ export function parseCmsHtml(
       for (const [rowIndex, row] of rows.entries()) {
         const rawHeader = rowHeaders[rowIndex] ?? '';
         const inferredYear = inferYearFromNeighborHeaders(rowHeaders, rowIndex);
-        const headerEntries = parseHeaderEntries(rawHeader, canteenId, inferredYear, anomalies);
+        const inferredDate = inferDateFromWeekdayOnlyHeader(rowHeaders, rowIndex);
+        const headerEntries = parseHeaderEntries(
+          rawHeader,
+          canteenId,
+          inferredYear,
+          inferredDate,
+          anomalies,
+        );
         if (headerEntries.length === 0) continue;
 
         const bodyCell = $(row).find(selectors.bodyCell).first().get(0);

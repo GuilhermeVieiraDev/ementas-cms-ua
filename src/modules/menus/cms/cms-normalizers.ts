@@ -49,6 +49,21 @@ function normalizeWeekdayComparable(value: string): string {
   return normalizeComparable(value).replace(/-feira$/u, '');
 }
 
+function getWeekdayNumber(value: string): number | null {
+  const weekday = normalizeWeekdayComparable(value);
+  const weekdays = new Map<string, number>([
+    ['segunda', 1],
+    ['terca', 2],
+    ['quarta', 3],
+    ['quinta', 4],
+    ['sexta', 5],
+    ['sabado', 6],
+    ['domingo', 7],
+  ]);
+
+  return weekdays.get(weekday) ?? null;
+}
+
 function getServicesFromText(value: string): MealService[] {
   const normalized = normalizeComparable(value);
   const services: MealService[] = [];
@@ -203,6 +218,61 @@ export function inferYearFromNeighborHeaders(
   return rankedCandidates[0]?.year ?? null;
 }
 
+export function inferDateFromWeekdayOnlyHeader(
+  headers: string[],
+  targetIndex: number,
+): DateTime | null {
+  const targetWeekday = getWeekdayNumber(headers[targetIndex] ?? '');
+  if (targetWeekday === null) return null;
+
+  let previousDate: DateTime | null = null;
+  for (let index = targetIndex - 1; index >= 0; index -= 1) {
+    const candidate = getValidDateFromHeader(headers[index] ?? '');
+    if (candidate) {
+      previousDate = candidate;
+      break;
+    }
+  }
+
+  let nextDate: DateTime | null = null;
+  for (let index = targetIndex + 1; index < headers.length; index += 1) {
+    const candidate = getValidDateFromHeader(headers[index] ?? '');
+    if (candidate) {
+      nextDate = candidate;
+      break;
+    }
+  }
+
+  const candidates: DateTime[] = [];
+
+  if (previousDate) {
+    const daysAhead = (targetWeekday - previousDate.weekday + 7) % 7;
+    if (daysAhead > 0) candidates.push(previousDate.plus({ days: daysAhead }));
+  }
+
+  if (nextDate) {
+    const daysBack = (nextDate.weekday - targetWeekday + 7) % 7;
+    if (daysBack > 0) candidates.push(nextDate.minus({ days: daysBack }));
+  }
+
+  if (candidates.length === 0) return null;
+
+  const validCandidates = candidates.filter((candidate) => {
+    if (previousDate && candidate <= previousDate) return false;
+    if (nextDate && candidate >= nextDate) return false;
+    return true;
+  });
+
+  if (validCandidates.length === 0) return null;
+
+  const firstIsoDate = validCandidates[0]?.toISODate();
+  if (!firstIsoDate) return null;
+
+  return validCandidates.every((candidate) => candidate.toISODate() === firstIsoDate)
+    ? validCandidates[0] ?? null
+    : null;
+}
+
 export function parseHeader(
   rawHeader: string,
   canteenId: string,
@@ -343,10 +413,33 @@ export function parseHeaderEntries(
   rawHeader: string,
   canteenId: string,
   inferredYear: number | null,
+  inferredDate: DateTime | null,
   anomalies: ScrapeAnomaly[],
 ): HeaderParseSuccess[] {
   const rangeEntries = parseRangeHeader(rawHeader, canteenId, anomalies);
   if (rangeEntries) return rangeEntries;
+
+  if (inferredDate) {
+    const isoDate = inferredDate.toISODate();
+    if (isoDate) {
+      anomalies.push(
+        createAnomaly(
+          'INFERRED_DATE',
+          canteenId,
+          rawHeader,
+          `Inferred date ${isoDate} from neighboring rows`,
+        ),
+      );
+
+      return [
+        {
+          date: isoDate,
+          weekday: englishWeekdayFromIso(isoDate),
+          serviceHint: null,
+        },
+      ];
+    }
+  }
 
   const singleEntry = parseHeader(rawHeader, canteenId, inferredYear, anomalies);
   return singleEntry ? [singleEntry] : [];
