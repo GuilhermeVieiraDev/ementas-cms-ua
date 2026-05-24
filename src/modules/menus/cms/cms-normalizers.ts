@@ -342,7 +342,7 @@ export function parseHeader(
   const sourceWeekday = match.groups.weekday ? normalizeSpaces(match.groups.weekday) : null;
 
   let year = Number(yearText);
-  if (yearText.length !== 4 || (inferredYear !== null && inferredYear !== year)) {
+  if (yearText.length !== 4) {
     if (inferredYear === null) {
       anomalies.push(
         createAnomaly(
