@@ -8,8 +8,8 @@ services:
         HTTPS_PROXY: "${HTTPS_PROXY:-}"
         NO_PROXY: "${NO_PROXY:-}"
     image: ementas-api:local
-    ports:
-      - "${API_PORT:-3000}:3000"
+    expose:
+      - "3000"
     env_file:
       - path: .env
         required: false
@@ -30,8 +30,12 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        VITE_API_BASE_URL: "${VITE_API_BASE_URL:-http://localhost:3000}"
+        VITE_API_BASE_URL: "${VITE_API_BASE_URL:-}"
     image: ementas-web:local
+    depends_on:
+      - api
+    environment:
+      VITE_API_PROXY_TARGET: "http://api:3000"
     ports:
       - "${WEB_PORT:-5173}:5173"
     restart: unless-stopped

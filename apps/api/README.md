@@ -29,7 +29,9 @@ npm run start --workspace @ementas/api
 
 ## Docker
 
-The Dockerfile expects the **monorepo root** as build context. Either use the root `docker-compose.yml` or build manually from the repo root:
+The Dockerfile expects the **monorepo root** as build context. The root
+`docker-compose.yml` runs the API behind the web service. To build the API image
+manually from the repo root:
 
 ```bash
 docker build -t ementas-api -f apps/api/Dockerfile .
@@ -53,11 +55,15 @@ The repository includes a GitHub Actions workflow at
 that publishes the API image to GHCR on pushes to `main`, version tags like `v1.0.0`,
 and manual runs.
 
-Published image name:
+Published image names:
 
 ```text
 ghcr.io/guilhermevieiradev/ementas-cms-ua
+ghcr.io/guilhermevieiradev/ementas-cms-ua-api
+ghcr.io/guilhermevieiradev/ementas-cms-ua-web
 ```
+
+The first image name is kept for API deployment compatibility.
 
 ## Environment Variables
 

@@ -10,17 +10,20 @@ npm run dev:api
 npm run dev:web
 ```
 
-The web app runs on `http://localhost:5173` and expects the API at
-`http://localhost:3000` by default.
+The web app runs on `http://localhost:5173` and requests the API through
+same-origin `/api` paths. Vite proxies those requests to the API during dev.
 
 To point it somewhere else:
 
 ```env
-VITE_API_BASE_URL=http://localhost:3000
+VITE_API_BASE_URL=https://api.example.com
 ```
 
 ## Docker
 
 ```bash
-VITE_API_BASE_URL=https://your-api.example.com docker compose up --build
+docker compose up --build
 ```
+
+Compose exposes the web app and keeps the API internal. API routes are available
+from the same public origin under `/api`.

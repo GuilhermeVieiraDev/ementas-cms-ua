@@ -7,7 +7,7 @@ COPY apps/web/package.json ./apps/web/
 RUN npm ci --workspace @ementas/web --include-workspace-root
 
 FROM deps AS build
-ARG VITE_API_BASE_URL=http://localhost:3000
+ARG VITE_API_BASE_URL=
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 COPY apps/web ./apps/web
 RUN npm run build --workspace @ementas/web
@@ -20,6 +20,7 @@ ENV PORT=5173
 COPY --from=build /app/apps/web/dist ./dist
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/web/package.json ./
+COPY apps/web/vite.config.ts ./
 
 EXPOSE 5173
 
