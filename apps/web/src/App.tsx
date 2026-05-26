@@ -1,4 +1,4 @@
-import { RefreshCw } from 'lucide-react'
+import { ExternalLink, RefreshCw } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -183,7 +183,7 @@ function App() {
   }, [availableDates.length])
 
   return (
-    <main className="min-h-svh bg-[#fbfaf6] text-[#20201c]">
+    <main className="min-h-svh bg-[#fbfaf6] pb-16 text-[#20201c]">
       <div className="mx-auto flex w-full max-w-6xl flex-col px-4 py-5 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-6 border-b border-[#dedbd0] pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-2">
@@ -298,7 +298,54 @@ function App() {
           ) : null}
         </section>
       </div>
+      <Footer />
     </main>
+  )
+}
+
+function Footer() {
+  return (
+    <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-[#cfc8b8] bg-[#eee9dd]/95 px-4 py-2 text-xs text-[#5f5b50] backdrop-blur">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center">
+        <span>
+          Created by{' '}
+          <a
+            className="font-medium text-[#1f342f] underline-offset-4 hover:underline"
+            href="https://github.com/guilhermeVieiraDev/"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Guilherme Vieira
+          </a>
+        </span>
+        <span aria-hidden="true" className="text-[#b8b2a2]">
+          /
+        </span>
+        <span>
+          Hosted by{' '}
+          <a
+            className="font-medium text-[#1f342f] underline-offset-4 hover:underline"
+            href="https://github.com/FranciscoRibeiro03/"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Francisco Ribeiro
+          </a>
+        </span>
+        <span aria-hidden="true" className="text-[#b8b2a2]">
+          /
+        </span>
+        <a
+          className="inline-flex items-center gap-1.5 font-medium text-[#1f342f] underline-offset-4 hover:underline"
+          href="https://github.com/guilhermevieiradev/ementas-cms-ua"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <ExternalLink className="size-3.5" />
+          GitHub
+        </a>
+      </div>
+    </footer>
   )
 }
 
