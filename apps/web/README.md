@@ -27,3 +27,6 @@ docker compose up --build
 
 Compose exposes the web app and keeps the API internal. API routes are available
 from the same public origin under `/api`.
+
+When serving through a domain, set `VITE_ALLOWED_HOSTS` on the web service to
+the public host, for example `VITE_ALLOWED_HOSTS=your-domain.example.com`.

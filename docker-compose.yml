@@ -36,6 +36,7 @@ services:
       - api
     environment:
       VITE_API_PROXY_TARGET: "http://api:3000"
+      VITE_ALLOWED_HOSTS: "${VITE_ALLOWED_HOSTS:-}"
     ports:
       - "${WEB_PORT:-5173}:5173"
     restart: unless-stopped
