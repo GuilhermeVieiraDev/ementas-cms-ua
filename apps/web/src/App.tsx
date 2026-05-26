@@ -6,6 +6,8 @@ import {
   type CanteenMenu,
   type MealMenu,
   type MenuItemCategory,
+  type MenuItem,
+  type MenuItemTier,
   getCanteens,
   getMenus,
 } from '@/api'
@@ -28,6 +30,11 @@ const CATEGORY_LABELS: Record<MenuItemCategory, string> = {
   diet: 'Dieta',
   vegetarian: 'Vegetariano',
   other: 'Outro',
+}
+
+const TIER_LABELS: Record<Exclude<MenuItemTier, null>, string> = {
+  normal: 'Normal',
+  option: 'Opção',
 }
 
 const SERVICE_LABELS: Record<MealMenu['service'], string> = {
@@ -334,11 +341,11 @@ function MealBlock({ meal }: { meal: MealMenu }) {
         <ul className="divide-y divide-[#e7e3d7] border-l border-[#d8d3c4]">
           {meal.items.map((item, index) => (
             <li
-              key={`${item.category}-${item.text}-${index}`}
+              key={`${item.category}-${item.tier ?? 'none'}-${item.text}-${index}`}
               className="grid gap-1 px-4 py-2 sm:grid-cols-[120px_1fr]"
             >
               <span className="text-xs font-medium uppercase tracking-[0.12em] text-[#777466]">
-                {CATEGORY_LABELS[item.category]}
+                {getItemLabel(item)}
               </span>
               <span className="text-sm leading-6 text-[#25251f]">{item.text}</span>
             </li>
@@ -351,6 +358,10 @@ function MealBlock({ meal }: { meal: MealMenu }) {
       )}
     </div>
   )
+}
+
+function getItemLabel(item: MenuItem) {
+  return item.tier ? TIER_LABELS[item.tier] : CATEGORY_LABELS[item.category]
 }
 
 function LoadingState() {

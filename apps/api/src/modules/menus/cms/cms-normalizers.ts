@@ -12,6 +12,7 @@ import type {
   MealService,
   MenuItem,
   MenuItemCategory,
+  MenuItemTier,
   ScrapeAnomaly,
 } from '../menus.types.js';
 import { createAnomaly } from './cms-anomalies.js';
@@ -554,9 +555,16 @@ export function isClosedLine(line: string): boolean {
 const CATEGORY_MAPPINGS: Array<{
   prefix: string;
   category: MenuItemCategory;
+  tier?: Exclude<MenuItemTier, null>;
 }> = [
+  { prefix: 'Prato Normal', category: 'other', tier: 'normal' },
+  { prefix: 'Prato Opção', category: 'other', tier: 'option' },
   { prefix: 'Prato Carne', category: 'meat' },
   { prefix: 'Prato Peixe', category: 'fish' },
+  { prefix: 'Prato Vegetariano', category: 'vegetarian' },
+  { prefix: 'Normal', category: 'other', tier: 'normal' },
+  { prefix: 'Opção', category: 'other', tier: 'option' },
+  { prefix: 'Vegetariano', category: 'vegetarian' },
   { prefix: 'Vegetariana', category: 'vegetarian' },
   { prefix: 'Dieta', category: 'diet' },
   { prefix: 'Carne', category: 'meat' },
@@ -572,6 +580,7 @@ export function parseMenuLine(line: string): MenuItem {
 
     return {
       category: mapping.category,
+      tier: mapping.tier ?? null,
       sourceLabel: mapping.prefix,
       text: cleanLine(match[1] ?? ''),
     };
@@ -579,6 +588,7 @@ export function parseMenuLine(line: string): MenuItem {
 
   return {
     category: 'other',
+    tier: null,
     sourceLabel: null,
     text: cleanLine(line),
   };

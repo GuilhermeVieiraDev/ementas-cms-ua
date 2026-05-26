@@ -7,9 +7,11 @@ export type MenuItemCategory =
   | 'diet'
   | 'vegetarian'
   | 'other';
+export type MenuItemTier = 'normal' | 'option' | null;
 
 export interface MenuItem {
   category: MenuItemCategory;
+  tier: MenuItemTier;
   sourceLabel: string | null;
   text: string;
 }
