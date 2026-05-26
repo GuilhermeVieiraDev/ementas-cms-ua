@@ -8,7 +8,9 @@
   ],
   "scripts": {
     "dev:api": "npm run dev --workspace @ementas/api",
+    "dev:web": "npm run dev --workspace @ementas/web",
     "build:api": "npm run build --workspace @ementas/api",
+    "build:web": "npm run build --workspace @ementas/web",
     "start:api": "npm run start --workspace @ementas/api",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"

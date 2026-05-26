@@ -1,8 +1,13 @@
 import { existsSync } from 'node:fs';
 import { loadEnvFile } from 'node:process';
 
-if (existsSync('.env')) {
-  loadEnvFile('.env');
+const envFiles = ['.env', '../../.env'];
+
+for (const envFile of envFiles) {
+  if (existsSync(envFile)) {
+    loadEnvFile(envFile);
+    break;
+  }
 }
 
 function parseNumber(value: string | undefined, fallback: number): number {

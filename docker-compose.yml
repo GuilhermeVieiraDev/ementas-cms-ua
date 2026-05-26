@@ -10,6 +10,9 @@ services:
     image: ementas-api:local
     ports:
       - "${API_PORT:-3000}:3000"
+    env_file:
+      - path: .env
+        required: false
     environment:
       PORT: 3000
       LOG_LEVEL: "${LOG_LEVEL:-info}"
@@ -20,4 +23,15 @@ services:
       HTTP_PROXY: "${HTTP_PROXY:-}"
       HTTPS_PROXY: "${HTTPS_PROXY:-}"
       NO_PROXY: "${NO_PROXY:-}"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_BASE_URL: "${VITE_API_BASE_URL:-http://localhost:3000}"
+    image: ementas-web:local
+    ports:
+      - "${WEB_PORT:-5173}:5173"
     restart: unless-stopped
