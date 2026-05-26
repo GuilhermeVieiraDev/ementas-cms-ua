@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import { diffDaysInclusive, isValidIsoDate } from '../../lib/dates.js';
 
+const MAX_MENU_RANGE_DAYS = 120;
+
 const includeAnomaliesSchema = z
   .union([
     z.boolean(),
@@ -50,10 +52,10 @@ export const menusQuerySchema = z
       });
     }
 
-    if (diffDaysInclusive(from, to) > 31) {
+    if (diffDaysInclusive(from, to) > MAX_MENU_RANGE_DAYS) {
       context.addIssue({
         code: 'custom',
-        message: 'Date range cannot exceed 31 days',
+        message: `Date range cannot exceed ${MAX_MENU_RANGE_DAYS} days`,
         path: ['to'],
       });
     }
