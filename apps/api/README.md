@@ -1,0 +1,194 @@
+# @ementas/api
+
+Small Express.js API in TypeScript that scrapes the public UA canteen CMS and exposes normalized menu data.
+
+## What It Does
+
+- Fetches `https://cms.ua.pt/ementas/ementas`
+- Parses canteen tables into a typed API
+- Normalizes lunch/dinner rows, weekend split rows, empty rows, and `Encerrado` entries
+- Repairs some malformed CMS headers, including broken years when they can be inferred
+- Caches the full scrape in memory for 10 minutes by default
+
+## Run from the monorepo root
+
+```bash
+npm install
+npm run dev:api
+```
+
+The API starts on `http://localhost:3000` by default.
+
+## Run only this workspace
+
+```bash
+npm run dev --workspace @ementas/api
+npm run build --workspace @ementas/api
+npm run start --workspace @ementas/api
+```
+
+## Docker
+
+The Dockerfile expects the **monorepo root** as build context. Either use the root `docker-compose.yml` or build manually from the repo root:
+
+```bash
+docker build -t ementas-api -f apps/api/Dockerfile .
+docker run --rm -p 3000:3000 ementas-api
+```
+
+With custom env values:
+
+```bash
+docker run --rm -p 3000:3000 \
+  -e LOG_LEVEL=debug \
+  -e CACHE_TTL_MS=300000 \
+  -e STALE_CACHE_MAX_AGE_MS=21600000 \
+  ementas-api
+```
+
+## GitHub Container Registry
+
+The repository includes a GitHub Actions workflow at
+[`/.github/workflows/publish-docker-image.yml`](../../.github/workflows/publish-docker-image.yml)
+that publishes the API image to GHCR on pushes to `main`, version tags like `v1.0.0`,
+and manual runs.
+
+Published image name:
+
+```text
+ghcr.io/guilhermevieiradev/ementas-cms-ua
+```
+
+## Environment Variables
+
+```env
+PORT=3000
+LOG_LEVEL=info
+CACHE_TTL_MS=600000
+STALE_CACHE_MAX_AGE_MS=21600000
+CMS_UA_USERNAME=
+CMS_UA_PASSWORD=
+HTTP_PROXY=
+HTTPS_PROXY=
+NO_PROXY=
+```
+
+The UA CMS currently redirects through the UA Shibboleth IDP. Set
+`CMS_UA_USERNAME` and `CMS_UA_PASSWORD` so the scraper can log in, preserve the
+CMS/IDP cookies, and then explicitly fetch `https://cms.ua.pt/ementas/ementas`
+after authentication. If the university session expires, the next refresh will
+detect the IDP redirect and log in again.
+
+If your environment needs an outbound proxy to reach the UA CMS, set
+`HTTP_PROXY` or `HTTPS_PROXY`. The app configures the global fetch dispatcher
+from those variables, and `docker-compose.yml` passes them through to both the
+image build and the running container.
+
+## Scripts
+
+```bash
+npm run dev       # tsx watch
+npm run build     # tsc → dist/
+npm run start     # node dist/server.js
+npm run typecheck
+npm run lint
+```
+
+## Routes
+
+### `GET /health`
+
+Returns server health plus current cache state.
+
+### `GET /api/v1/canteens`
+
+Returns stable canteen identifiers:
+
+```json
+{
+  "canteens": [
+    { "id": "crasto", "name": "Crasto" },
+    { "id": "grelhados", "name": "Grelhados" },
+    { "id": "estga", "name": "ESTGA" },
+    { "id": "restaurante-vegetariano", "name": "Restaurante Vegetariano" },
+    { "id": "tresde", "name": "TrêsDê" }
+  ]
+}
+```
+
+### `GET /api/v1/menus`
+
+Query params:
+
+- `from=YYYY-MM-DD`
+- `to=YYYY-MM-DD`
+- `canteens=crasto,estga`
+- `includeAnomalies=true`
+
+If no dates are sent, the API defaults to today in `Europe/Lisbon`.
+
+Example:
+
+```bash
+curl "http://localhost:3000/api/v1/menus?from=2026-04-07&to=2026-04-10&canteens=crasto,estga"
+```
+
+Example response shape:
+
+```json
+{
+  "meta": {
+    "sourceUrl": "https://cms.ua.pt/ementas/ementas",
+    "fetchedAt": "2026-04-07T12:00:00.000Z",
+    "requestedRange": {
+      "from": "2026-04-07",
+      "to": "2026-04-10"
+    },
+    "availableRange": {
+      "from": "2026-04-07",
+      "to": "2026-05-11"
+    },
+    "timezone": "Europe/Lisbon",
+    "cached": true,
+    "stale": false,
+    "anomalyCount": 3
+  },
+  "canteens": [],
+  "anomalies": []
+}
+```
+
+## Data Model
+
+Key normalized enums:
+
+- `MealService`: `lunch | dinner | unknown`
+- `MealStatus`: `available | closed | empty`
+- `MenuItemCategory`: `soup | meat | fish | diet | vegetarian | other`
+
+Each menu item keeps:
+
+- `category`
+- `sourceLabel`
+- `text`
+
+The API intentionally does not split items into a `name` and `description` because the CMS content is inconsistent.
+
+## Parser Notes
+
+The current scraper relies on:
+
+- `div.view-content table.tabelahead.views-table`
+- `caption`
+- `td.views-field-title`
+- `td.views-field-body`
+
+Known CMS issues handled by the parser:
+
+- incorrect weekday labels
+- malformed years such as `08/04/206`
+- double slashes such as `05/05//2026`
+- weekend rows with both lunch and dinner in one body
+- empty body rows
+- `Encerrado` rows
+- logical line breaks encoded with `<br>` inside a paragraph

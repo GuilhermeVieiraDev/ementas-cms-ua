@@ -2,19 +2,21 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/api/Dockerfile
       args:
         HTTP_PROXY: "${HTTP_PROXY:-}"
         HTTPS_PROXY: "${HTTPS_PROXY:-}"
         NO_PROXY: "${NO_PROXY:-}"
-    image: ementas-cms:local
+    image: ementas-api:local
     ports:
-      - "${PORT:-3000}:3000"
+      - "${API_PORT:-3000}:3000"
     environment:
       PORT: 3000
       LOG_LEVEL: "${LOG_LEVEL:-info}"
       CACHE_TTL_MS: "${CACHE_TTL_MS:-600000}"
       STALE_CACHE_MAX_AGE_MS: "${STALE_CACHE_MAX_AGE_MS:-21600000}"
+      CMS_UA_USERNAME: "${CMS_UA_USERNAME:-}"
+      CMS_UA_PASSWORD: "${CMS_UA_PASSWORD:-}"
       HTTP_PROXY: "${HTTP_PROXY:-}"
       HTTPS_PROXY: "${HTTPS_PROXY:-}"
       NO_PROXY: "${NO_PROXY:-}"

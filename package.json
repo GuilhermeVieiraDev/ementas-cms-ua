@@ -1,49 +1,20 @@
 {
-  "name": "ementas-cms",
+  "name": "ementas-cms-ua",
   "version": "1.0.0",
-  "description": "TypeScript Express API that scrapes UA canteen menus from the public CMS.",
+  "description": "Monorepo for the UA canteen menus scraper API.",
   "private": true,
-  "main": "dist/server.js",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/server.js",
-    "lint": "eslint .",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-  },
-  "keywords": [
-    "express",
-    "typescript",
-    "scraping",
-    "ua",
-    "ementas"
+  "workspaces": [
+    "apps/*"
   ],
-  "license": "ISC",
-  "type": "module",
+  "scripts": {
+    "dev:api": "npm run dev --workspace @ementas/api",
+    "build:api": "npm run build --workspace @ementas/api",
+    "start:api": "npm run start --workspace @ementas/api",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
   "engines": {
     "node": ">=22"
   },
-  "dependencies": {
-    "cheerio": "^1.2.0",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "helmet": "^8.1.0",
-    "luxon": "^3.7.2",
-    "pino": "^10.3.1",
-    "pino-http": "^11.0.0",
-    "undici": "^8.1.0",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/luxon": "^3.7.1",
-    "@types/node": "^25.5.2",
-    "@typescript-eslint/eslint-plugin": "^8.58.0",
-    "@typescript-eslint/parser": "^8.58.0",
-    "eslint": "^10.2.0",
-    "prettier": "^3.8.1",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
-  }
+  "license": "ISC"
 }

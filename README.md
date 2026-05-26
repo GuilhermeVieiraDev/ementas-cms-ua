@@ -1,220 +1,61 @@
-# ementas-cms
+# ementas-cms-ua
 
-Small Express.js API in TypeScript that scrapes the public UA canteen CMS and exposes normalized menu data.
+Monorepo for the UA canteen menu project.
 
-## What It Does
-
-- Fetches `https://cms.ua.pt/ementas/ementas`
-- Parses canteen tables into a typed API
-- Normalizes lunch/dinner rows, weekend split rows, empty rows, and `Encerrado` entries
-- Repairs some malformed CMS headers, including broken years when they can be inferred
-- Caches the full scrape in memory for 10 minutes by default
+- **`apps/api`** — TypeScript Express API that scrapes [cms.ua.pt/ementas](https://cms.ua.pt/ementas/ementas) and serves a normalized menu feed.
 
 ## Requirements
 
 - Node.js `>= 22`
-- npm
+- npm `>= 9`
 
-## Setup
+## Install
 
 ```bash
 npm install
-cp .env.example .env
-npm run dev
 ```
 
-The API starts on `http://localhost:3000` by default.
+This installs every workspace through npm workspaces.
+
+## Develop
+
+```bash
+npm run dev:api
+```
+
+API runs on `http://localhost:3000`.
+
+## Build
+
+```bash
+npm run build:api
+```
+
+Per-workspace lint / typecheck:
+
+```bash
+npm run lint
+npm run typecheck
+```
 
 ## Docker
 
-Build the image:
+`docker-compose.yml` builds and runs the API as a standalone image.
 
 ```bash
-docker build -t ementas-cms .
+docker compose up --build
 ```
 
-Run the container:
+The API is exposed on `http://localhost:3000`.
+
+Custom port:
 
 ```bash
-docker run --rm -p 3000:3000 ementas-cms
+API_PORT=3001 docker compose up --build
 ```
 
-With custom env values:
+The compose file forwards `CMS_UA_USERNAME`, `CMS_UA_PASSWORD`, `LOG_LEVEL`, the cache settings, and the outbound proxy variables when present in your shell or in a root `.env`.
 
-```bash
-docker run --rm -p 3000:3000 \
-  -e LOG_LEVEL=debug \
-  -e CACHE_TTL_MS=300000 \
-  -e STALE_CACHE_MAX_AGE_MS=21600000 \
-  ementas-cms
-```
+## Docs per package
 
-Use Docker Compose with a local build:
-
-```bash
-docker-compose up --build
-```
-
-Run it in the background:
-
-```bash
-docker-compose up --build -d
-```
-
-Stop it:
-
-```bash
-docker-compose down
-```
-
-## GitHub Container Registry
-
-The repository includes a GitHub Actions workflow at
-[`/.github/workflows/publish-docker-image.yml`](./.github/workflows/publish-docker-image.yml)
-that publishes the Docker image to GHCR on pushes to `main`, version tags like `v1.0.0`,
-and manual runs.
-
-Published image name:
-
-```text
-ghcr.io/guilhermevieiradev/ementas-cms-ua
-```
-
-Notes:
-
-- The workflow uses the repository `GITHUB_TOKEN`, following GitHub's recommended GHCR flow.
-- The first published package may need its visibility changed in GitHub if you want it public.
-
-## Environment Variables
-
-```env
-PORT=3000
-LOG_LEVEL=info
-CACHE_TTL_MS=600000
-STALE_CACHE_MAX_AGE_MS=21600000
-CMS_UA_USERNAME=
-CMS_UA_PASSWORD=
-HTTP_PROXY=
-HTTPS_PROXY=
-NO_PROXY=
-```
-
-The UA CMS currently redirects through the UA Shibboleth IDP. Set
-`CMS_UA_USERNAME` and `CMS_UA_PASSWORD` so the scraper can log in, preserve the
-CMS/IDP cookies, and then explicitly fetch `https://cms.ua.pt/ementas/ementas`
-after authentication. If the university session expires, the next refresh will
-detect the IDP redirect and log in again.
-
-If your environment needs an outbound proxy to reach the UA CMS, set
-`HTTP_PROXY` or `HTTPS_PROXY`. The app configures the global fetch dispatcher
-from those variables, and `docker-compose.yml` passes them through to both the
-image build and the running container.
-
-## Scripts
-
-```bash
-npm run dev
-npm run build
-npm run start
-npm run typecheck
-npm run lint
-```
-
-## Routes
-
-### `GET /health`
-
-Returns server health plus current cache state.
-
-### `GET /api/v1/canteens`
-
-Returns stable canteen identifiers:
-
-```json
-{
-  "canteens": [
-    { "id": "crasto", "name": "Crasto" },
-    { "id": "grelhados", "name": "Grelhados" },
-    { "id": "estga", "name": "ESTGA" },
-    { "id": "restaurante-vegetariano", "name": "Restaurante Vegetariano" },
-    { "id": "tresde", "name": "TrêsDê" }
-  ]
-}
-```
-
-### `GET /api/v1/menus`
-
-Query params:
-
-- `from=YYYY-MM-DD`
-- `to=YYYY-MM-DD`
-- `canteens=crasto,estga`
-- `includeAnomalies=true`
-
-If no dates are sent, the API defaults to today in `Europe/Lisbon`.
-
-Example:
-
-```bash
-curl "http://localhost:3000/api/v1/menus?from=2026-04-07&to=2026-04-10&canteens=crasto,estga"
-```
-
-Example response shape:
-
-```json
-{
-  "meta": {
-    "sourceUrl": "https://cms.ua.pt/ementas/ementas",
-    "fetchedAt": "2026-04-07T12:00:00.000Z",
-    "requestedRange": {
-      "from": "2026-04-07",
-      "to": "2026-04-10"
-    },
-    "availableRange": {
-      "from": "2026-04-07",
-      "to": "2026-05-11"
-    },
-    "timezone": "Europe/Lisbon",
-    "cached": true,
-    "stale": false,
-    "anomalyCount": 3
-  },
-  "canteens": [],
-  "anomalies": []
-}
-```
-
-## Data Model
-
-Key normalized enums:
-
-- `MealService`: `lunch | dinner | unknown`
-- `MealStatus`: `available | closed | empty`
-- `MenuItemCategory`: `soup | meat | fish | diet | vegetarian | other`
-
-Each menu item keeps:
-
-- `category`
-- `sourceLabel`
-- `text`
-
-The API intentionally does not split items into a `name` and `description` because the CMS content is inconsistent.
-
-## Parser Notes
-
-The current scraper relies on:
-
-- `div.view-content table.tabelahead.views-table`
-- `caption`
-- `td.views-field-title`
-- `td.views-field-body`
-
-Known CMS issues handled by the parser:
-
-- incorrect weekday labels
-- malformed years such as `08/04/206`
-- double slashes such as `05/05//2026`
-- weekend rows with both lunch and dinner in one body
-- empty body rows
-- `Encerrado` rows
-- logical line breaks encoded with `<br>` inside a paragraph
+- API details, environment variables, anomaly handling: [`apps/api/README.md`](./apps/api/README.md).
