@@ -4,13 +4,15 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
+const WEBSITE_REFRESH_INTERVAL_MS = 8 * 60 * 60 * 1000
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchInterval: 60 * 60 * 1000,
+      refetchInterval: WEBSITE_REFRESH_INTERVAL_MS,
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 30 * 60 * 1000,
+      staleTime: WEBSITE_REFRESH_INTERVAL_MS,
     },
   },
 })
