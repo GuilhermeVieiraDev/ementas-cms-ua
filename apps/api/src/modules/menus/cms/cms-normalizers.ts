@@ -31,6 +31,9 @@ interface HeaderDateParts {
   yearText: string;
 }
 
+const HEADER_DATE_PATTERN =
+  /^(?:(?<weekday>[^\d]+?)\s+)?(?<day>\d{2})\/(?<month>\d{2})\/+(?<year>\d{1,4})(?:\s+(?:janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+\d{4})?$/iu;
+
 function normalizeSpaces(value: string): string {
   return value.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -100,9 +103,7 @@ function parseHeaderDateParts(rawHeader: string): HeaderDateParts | null {
     remainder = '';
   }
 
-  const match = remainder.match(
-    /^(?:(?<weekday>[^\d]+?)\s+)?(?<day>\d{2})\/(?<month>\d{2})\/+(?<year>\d{1,4})$/u,
-  );
+  const match = remainder.match(HEADER_DATE_PATTERN);
   if (!match?.groups) return null;
 
   const dayText = match.groups.day;
@@ -307,9 +308,7 @@ export function parseHeader(
     remainder = '';
   }
 
-  const match = remainder.match(
-    /^(?:(?<weekday>[^\d]+?)\s+)?(?<day>\d{2})\/(?<month>\d{2})\/+(?<year>\d{1,4})$/u,
-  );
+  const match = remainder.match(HEADER_DATE_PATTERN);
 
   if (!match?.groups) {
     anomalies.push(
