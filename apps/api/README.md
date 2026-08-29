@@ -114,6 +114,7 @@ Returns stable canteen identifiers:
 {
   "canteens": [
     { "id": "crasto", "name": "Crasto" },
+    { "id": "santiago", "name": "Santiago" },
     { "id": "grelhados", "name": "Grelhados" },
     { "id": "estga", "name": "ESTGA" },
     { "id": "restaurante-vegetariano", "name": "Restaurante Vegetariano" },
@@ -121,6 +122,9 @@ Returns stable canteen identifiers:
   ]
 }
 ```
+
+The list includes stable canteens even when the CMS has no menu published for
+them. Requests for those canteens return an empty `days` array.
 
 ### `GET /api/v1/menus`
 
