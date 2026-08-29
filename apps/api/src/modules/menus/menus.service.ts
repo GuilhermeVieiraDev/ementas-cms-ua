@@ -5,6 +5,11 @@ import { env } from '../../config/env.js';
 import { getTodayIsoDate, LISBON_TIMEZONE } from '../../lib/dates.js';
 import { HttpError } from '../../lib/http-error.js';
 import { logger } from '../../lib/logger.js';
+import {
+  isKnownCanteenId,
+  listKnownCanteens,
+  selectCanteens,
+} from './canteens.catalog.js';
 import { parseCmsHtml } from './cms/cms-parser.js';
 import { CmsClient } from './cms/cms-client.js';
 import { menusQuerySchema } from './menus.schemas.js';
@@ -71,10 +76,7 @@ export class MenusService {
     const cacheResult = await this.getDatasetForRequest();
 
     return {
-      canteens: cacheResult.dataset.canteens.map((canteen) => ({
-        id: canteen.id,
-        name: canteen.name,
-      })),
+      canteens: listKnownCanteens(cacheResult.dataset.canteens),
     };
   }
 
@@ -83,8 +85,9 @@ export class MenusService {
     const { dataset } = cacheResult;
 
     if (query.canteens && query.canteens.length > 0) {
-      const knownIds = new Set(dataset.canteens.map((canteen) => canteen.id));
-      const invalidIds = query.canteens.filter((canteenId) => !knownIds.has(canteenId));
+      const invalidIds = query.canteens.filter(
+        (canteenId) => !isKnownCanteenId(canteenId, dataset.canteens),
+      );
       if (invalidIds.length > 0) {
         throw new HttpError(
           400,
@@ -95,14 +98,12 @@ export class MenusService {
     }
 
     const selectedIds = query.canteens ? new Set(query.canteens) : null;
-    const canteens = dataset.canteens
-      .filter((canteen) => (selectedIds ? selectedIds.has(canteen.id) : true))
-      .map((canteen) => ({
-        ...canteen,
-        days: canteen.days.filter(
-          (day) => day.date >= query.from && day.date <= query.to,
-        ),
-      }));
+    const canteens = selectCanteens(dataset.canteens, query.canteens).map((canteen) => ({
+      ...canteen,
+      days: canteen.days.filter(
+        (day) => day.date >= query.from && day.date <= query.to,
+      ),
+    }));
 
     const anomalies = dataset.anomalies.filter((anomaly) =>
       selectedIds ? selectedIds.has(anomaly.canteenId) : true,
