@@ -603,6 +603,7 @@ const CATEGORY_MAPPINGS: Array<{
   { prefix: 'Prato Carne', category: 'meat' },
   { prefix: 'Prato Peixe', category: 'fish' },
   { prefix: 'Prato Vegetariano', category: 'vegetarian' },
+  { prefix: 'Prato Dieta', category: 'diet' },
   { prefix: 'Normal', category: 'other', tier: 'normal' },
   { prefix: 'Opção', category: 'other', tier: 'option' },
   { prefix: 'Vegetariano', category: 'vegetarian' },

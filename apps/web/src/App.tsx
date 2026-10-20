@@ -389,7 +389,7 @@ function MealBlock({ meal }: { meal: MealMenu }) {
           {meal.items.map((item, index) => (
             <li
               key={`${item.category}-${item.tier ?? 'none'}-${item.text}-${index}`}
-              className="grid gap-1 px-4 py-2 sm:grid-cols-[120px_1fr]"
+              className="grid gap-1 px-4 py-2 sm:grid-cols-[120px_1fr] sm:items-baseline"
             >
               <span className="text-xs font-medium uppercase tracking-[0.12em] text-[#777466]">
                 {getItemLabel(item)}
