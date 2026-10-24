@@ -582,7 +582,7 @@ export function extractBodyLines($: CheerioAPI, bodyCell: Element): string[] {
 }
 
 export function isServiceMarker(line: string): MealService | null {
-  const comparable = normalizeComparable(line);
+  const comparable = normalizeComparable(line).replace(/[\s:.\-–]+$/u, '');
   if (comparable === 'almoco') return 'lunch';
   if (comparable === 'jantar') return 'dinner';
   return null;
