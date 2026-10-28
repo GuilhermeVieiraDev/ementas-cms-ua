@@ -578,7 +578,7 @@ export function extractBodyLines($: CheerioAPI, bodyCell: Element): string[] {
 
   return rawChunks
     .map(cleanLine)
-    .filter((line) => line.length > 0 && !isLegendLine(line));
+    .filter((line) => /[\p{L}\p{N}]/u.test(line) && !isLegendLine(line));
 }
 
 export function isServiceMarker(line: string): MealService | null {
