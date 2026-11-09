@@ -32,7 +32,7 @@ interface HeaderDateParts {
 }
 
 const HEADER_DATE_PATTERN =
-  /^(?:(?<weekday>[^\d]+?)\s+)?(?<day>\d{2})\/(?<month>\d{2})\/+(?<year>\d{1,4})(?:\s+(?:janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+\d{4})?$/iu;
+  /^(?:(?<weekday>[^\d]+?)\s+)?(?<day>\d{1,2})\/(?<month>\d{1,2})\/+(?<year>\d{1,4})(?:\s+(?:janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s+\d{4})?$/iu;
 
 function normalizeSpaces(value: string): string {
   return value.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
@@ -86,7 +86,7 @@ function stripServicePrefix(value: string): string {
 
 function getHeaderWeekdayNumber(value: string): number | null {
   const remainder = stripServicePrefix(value);
-  const match = remainder.match(/^(?<weekday>[^\d]+?)(?:\s+\d{2}\/|$)/u);
+  const match = remainder.match(/^(?<weekday>[^\d]+?)(?:\s+\d{1,2}\/|$)/u);
   return getWeekdayNumber(match?.groups?.weekday ?? remainder);
 }
 
@@ -494,7 +494,7 @@ function parseRangeHeader(
 ): HeaderParseSuccess[] | null {
   const normalizedHeader = normalizeSpaces(rawHeader);
   const match = normalizedHeader.match(
-    /^De\s+(?<startDay>\d{2})\/(?<startMonth>\d{2})\s+a\s+(?<endDay>\d{2})\/(?<endMonth>\d{2})\/(?<year>\d{4})\s+(?<services>.+)$/iu,
+    /^De\s+(?<startDay>\d{1,2})\/(?<startMonth>\d{1,2})\s+a\s+(?<endDay>\d{1,2})\/(?<endMonth>\d{1,2})\/(?<year>\d{4})\s+(?<services>.+)$/iu,
   );
 
   if (!match?.groups) return null;
